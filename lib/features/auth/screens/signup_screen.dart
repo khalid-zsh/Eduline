@@ -119,7 +119,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   keyboardType: TextInputType.emailAddress),
               SizedBox(height: context.h(2.5)),
 
-              // Full Name
               _label('Full Name'),
               SizedBox(height: context.h(1.5)),
               CustomTextField(

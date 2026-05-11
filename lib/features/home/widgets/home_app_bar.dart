@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'package:eduline/core/constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:eduline/core/theme/app_colors.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
 import 'package:eduline/core/extensions/context_extension.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:eduline/features/auth/controllers/auth_controller.dart';
 
 Widget homeAppBar(BuildContext context, String location) {
@@ -31,23 +29,18 @@ Widget homeAppBar(BuildContext context, String location) {
         child: Obx(() {
           final user = authController.currentUser.value;
           final imageUrl = user?.profileImage;
-          if (imageUrl != null && imageUrl.isNotEmpty && imageUrl.startsWith('http')) {
-            return CircleAvatar(radius: 24, backgroundImage: NetworkImage(imageUrl));
-          } else {
-            return FutureBuilder<String?>(
-              future: SharedPreferences.getInstance().then((prefs) => prefs.getString('avatar_path')),
-              builder: (context, snapshot) {
-                final path = snapshot.data;
-                if (path != null && path.isNotEmpty && File(path).existsSync()) {
-                  return CircleAvatar(radius: 24, backgroundImage: FileImage(File(path)));
-                }
-                return CircleAvatar(
-                  radius: 24,
-                  backgroundImage: const AssetImage("assets/Profile/avatar.jpg") as ImageProvider,
-                );
-              },
+          if (imageUrl != null && imageUrl.isNotEmpty) {
+            return CircleAvatar(
+              radius: 24,
+              backgroundImage: NetworkImage(imageUrl),
             );
           }
+          return CircleAvatar(
+            radius: 24,
+            backgroundImage: AssetImage(
+              "assets/profile/user.png",
+            ),
+          );
         }),
       ),
       title: Obx(() {

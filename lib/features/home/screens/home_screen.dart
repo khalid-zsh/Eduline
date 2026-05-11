@@ -15,6 +15,8 @@ import 'package:eduline/features/product/screens/product_detail_screen.dart';
 import 'package:eduline/shared/widgets/custom_tab_bar.dart';
 import 'package:eduline/features/home/widgets/home_app_bar.dart';
 
+import '../../auth/controllers/auth_controller.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -24,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ProductController _controller = Get.find<ProductController>();
+  final AuthController _authController = Get.find<AuthController>();
   bool _showOngoing = true;
   final location = ''.obs;
 
@@ -219,8 +222,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     childAspectRatio: 0.78,
                                   ),
                                   itemBuilder: (context, index) {
-                                    final product =
-                                    _controller.products[index];
+
+                                    final product = _controller.products[index];
+                                    final currentUserId = _authController.currentUser.value?.id;
+                                    final bool isMyProduct = product.userId == currentUserId;
                                     return CustomGridView(
                                       imageAsset: product
                                           .imageUrl.isNotEmpty
@@ -232,13 +237,31 @@ class _HomeScreenState extends State<HomeScreen> {
                                       '\$${product.price.toStringAsFixed(2)}',
                                       inStock: product.stock > 0,
                                       onViewDetails: () {
-                                        Get.to(
-                                              () => ProductDetailScreen(
-                                              product: product),
-                                        );
+                                        Get.to(() => ProductDetailScreen(product: product),);
                                       },
                                       onEdit: () {
-                                        Get.to(() => AddEditProductScreen(product: product));
+                                        final currentUserId =
+                                            _authController.currentUser.value?.id;
+
+                                        if (product.userId == null) {
+                                          Get.snackbar(
+                                            'Unavailable',
+                                            'Demo products cannot be edited.',
+                                            snackPosition: SnackPosition.BOTTOM,
+                                          );
+                                          return;
+                                        }
+                                        if (product.userId == currentUserId) {
+                                          Get.snackbar(
+                                            'Access Denied',
+                                            'You can edit only your own products.',
+                                            snackPosition: SnackPosition.BOTTOM,
+                                          );
+                                          return;
+                                        }
+                                        Get.to(
+                                              () => AddEditProductScreen(product: product,),
+                                        );
                                       },
                                     );
                                   },

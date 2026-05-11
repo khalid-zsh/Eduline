@@ -77,7 +77,12 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
     await prefs.setString('language', selected.languageCode);
     Get.snackbar('Success', 'Language changed to ${selected.name}',
         backgroundColor: Colors.green, colorText: Colors.white);
-    Get.toNamed(AppRoutes.setupProfile);
+    Get.offAllNamed(
+      AppRoutes.setupProfile,
+      arguments: {
+        'mode': 'create',
+      },
+    );
   }
 
   @override

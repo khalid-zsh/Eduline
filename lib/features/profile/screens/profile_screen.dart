@@ -20,18 +20,21 @@ class _ProfilePageState extends State<ProfilePage> {
   final ImagePicker _picker = ImagePicker();
   bool _isUpdating = false;
 
+
   Future<void> _pickImage() async {
     final pickedImage = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 80,
     );
     if (pickedImage == null) return;
-
-    setState(() => _isUpdating = true);
+    setState(() {
+      _isUpdating = true;
+    });
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('avatar_path', pickedImage.path);
-      setState(() => _isUpdating = false);
+      final authController = Get.find<AuthController>();
+      await authController.updateProfileImage(
+        File(pickedImage.path),
+      );
       Get.snackbar(
         'Success',
         'Profile image updated',
@@ -39,9 +42,16 @@ class _ProfilePageState extends State<ProfilePage> {
         colorText: Colors.white,
       );
     } catch (e) {
-      setState(() => _isUpdating = false);
-      Get.snackbar('Error', e.toString(),
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        _isUpdating = false;
+      });
     }
   }
 
@@ -170,7 +180,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       Icons.edit_outlined,
                       'Edit Profile',
                           () {
-                        Get.toNamed(AppRoutes.setupProfile, arguments: {'isEditMode': true});
+                            Get.toNamed(
+                              AppRoutes.setupProfile,
+                              arguments: {
+                                'mode': 'edit',
+                              },
+                            );
                       },
                     ),
                     _divider(context),

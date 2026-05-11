@@ -248,6 +248,8 @@ class RemoteDataSource {
 
     final streamed = await request.send().timeout(const Duration(seconds: 60));
     final response = await http.Response.fromStream(streamed);
+    print('CREATE STATUS: ${response.statusCode}');
+    print('CREATE BODY: ${response.body}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       return ProductModel.fromJson((data['data'] ?? data) as Map<String, dynamic>);
@@ -273,6 +275,8 @@ class RemoteDataSource {
 
     final streamed = await request.send().timeout(const Duration(seconds: 60));
     final response = await http.Response.fromStream(streamed);
+    print('UPDATE STATUS: ${response.statusCode}');
+    print('UPDATE BODY: ${response.body}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       return ProductModel.fromJson((data['data'] ?? data) as Map<String, dynamic>);

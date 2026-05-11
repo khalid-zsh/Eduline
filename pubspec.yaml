@@ -76,6 +76,7 @@ flutter:
     - assets/SuccessPopup/Star5.png
     - assets/SuccessPopup/Success.png
     - assets/SuccessPopup/TodoList.png
+    - assets/profile/user.png
     - assets/Loading/loading.json
     - assets/placeholder/placeholder.png
     - assets/upload_image/upload_image.png

@@ -1,5 +1,6 @@
 class ProductModel{
   final String? id;
+  final String? userId;
   final String name;
   final String description;
   final double price;
@@ -19,6 +20,7 @@ class ProductModel{
 
   ProductModel({
     this.id,
+    this.userId,
     required this.name,
     required this.description,
     required this.price,
@@ -40,6 +42,7 @@ class ProductModel{
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       id: json['_id'] ?? json['id'] ?? '',
+      userId: json['userId']?.toString(),
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
@@ -62,6 +65,7 @@ class ProductModel{
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
+      if (userId != null) 'userId': userId,
       'name': name,
       'description': description,
       'price': price,
@@ -75,7 +79,7 @@ class ProductModel{
       'weight': weight,
       'colors': colors,
       'dimensions': dimensions,
-      'imageUrl': imageUrl,
+      'image': imageUrl,
     };
   }
 
@@ -88,6 +92,7 @@ class ProductModel{
 
   ProductModel copyWith({
     String? id,
+    String? userId,
     String? name,
     String? description,
     double? price,
@@ -107,6 +112,7 @@ class ProductModel{
   }) {
     return ProductModel(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       name: name ?? this.name,
       description: description ?? this.description,
       price: price ?? this.price,

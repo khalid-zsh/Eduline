@@ -110,7 +110,13 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
     final isActive = _selectedStatus == 'Active';
     final product = ProductModel(
-      id: _isEditMode ? widget.product!.id : null,
+      id: _isEditMode
+          ? widget.product!.id
+          : null,
+      userId: _isEditMode
+          ? widget.product!.userId
+          : null,
+
       name: name,
       description: description,
       price: price,
@@ -119,12 +125,22 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       brand: _selectedBrand ?? '',
       isDiscounted: discountPercent > 0,
       discountPercent: discountPercent,
-      tags: _selectedTag != null ? [_selectedTag!] : [],
+      tags:
+      _selectedTag != null
+          ? [_selectedTag!]
+          : [],
       isActive: isActive,
       weight: weight,
-      colors: _selectedColor != null ? [_selectedColor!] : [],
+      colors:
+      _selectedColor != null
+          ? [_selectedColor!]
+          : [],
+
       dimensions: dimensions,
-      imageUrl: _isEditMode ? widget.product!.imageUrl : '',
+
+      imageUrl: _isEditMode
+          ? widget.product!.imageUrl
+          : '',
     );
 
     final imageFile = _selectedFilePath != null ? File(_selectedFilePath!) : null;
@@ -204,18 +220,57 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   }
 
   Widget _buildFixedSubmitButton() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      color: Colors.white,
-      child: CustomButton(
-        title: 'Submit',
-        color: AppColors.primaryColor,
+    return Obx(() {
+      final isLoading =
+          _productController.isLoading.value;
+
+      return Container(
         width: double.infinity,
-        height: 52,
-        onTap: _handleSubmit,
-      ),
-    );
+        padding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        color: Colors.white,
+
+        child: SizedBox(
+          height: 52,
+
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+              AppColors.primaryColor,
+
+              shape: RoundedRectangleBorder(
+                borderRadius:
+                BorderRadius.circular(12),
+              ),
+            ),
+
+            onPressed:
+            isLoading ? null : _handleSubmit,
+
+            child: isLoading
+                ? const SizedBox(
+              height: 24,
+              width: 24,
+              child:
+              CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.white,
+              ),
+            )
+                : const Text(
+              'Submit',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
   }
 
   Widget _buildProductForm() {

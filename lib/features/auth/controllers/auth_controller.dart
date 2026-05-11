@@ -23,8 +23,6 @@ class AuthController extends GetxController {
     _loadSavedCredentials();
   }
 
-
-
   Future<void> _loadSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token') ?? '';
@@ -35,7 +33,7 @@ class AuthController extends GetxController {
       savedPassword.value = prefs.getString('saved_password') ?? '';
     }
     if (token.isNotEmpty) {
-      await _fetchCurrentUser();
+      await fetchCurrentUser();
     }
   }
 
@@ -45,14 +43,14 @@ class AuthController extends GetxController {
     final remember = prefs.getBool('remember_me') ?? false;
     if (token.isNotEmpty && remember) {
       isLoggedIn.value = true;
-      await _fetchCurrentUser();
+      await fetchCurrentUser();
       return true;
     }
     return false;
   }
 
 
-  Future<void> _fetchCurrentUser() async {
+  Future<void> fetchCurrentUser() async {
     try {
       final user = await _remoteDataSource.getCurrentUser();
       currentUser.value = user;
@@ -83,7 +81,7 @@ class AuthController extends GetxController {
         await prefs.setString('saved_password', password);
       }
       isLoggedIn.value = true;
-      await _fetchCurrentUser();
+      await fetchCurrentUser();
       Get.offAllNamed(AppRoutes.enableLocation);
     } catch (e) {
       _showError('Login Failed', e.toString());
@@ -141,7 +139,7 @@ class AuthController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_token', token);
       isLoggedIn.value = true;
-      await _fetchCurrentUser();
+      await fetchCurrentUser();
       final isProfileSetup = prefs.getBool('isProfileSetup') ?? false;
       if (isProfileSetup) {
         Get.offAllNamed(AppRoutes.home);
@@ -229,7 +227,7 @@ class AuthController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isProfileSetup', true);
       if (image != null) await prefs.setString('avatar_path', image.path);
-      await _fetchCurrentUser();
+      await fetchCurrentUser();
     } catch (e) {
       _showError('Error', e.toString().replaceFirst('Exception: ', ''));
       rethrow;
