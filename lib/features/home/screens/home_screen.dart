@@ -1,0 +1,280 @@
+import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:eduline/core/theme/app_colors.dart';
+import 'package:eduline/features/product/controllers/product_controller.dart';
+import 'package:eduline/core/extensions/context_extension.dart';
+import 'package:eduline/features/product/widgets/product_grid_card.dart';
+import 'package:eduline/shared/widgets/custom_button.dart';
+import 'package:eduline/shared/widgets/custom_text.dart';
+import 'package:eduline/shared/widgets/error_widget.dart';
+import 'package:eduline/shared/widgets/loading_widget.dart';
+import 'package:eduline/features/product/screens/add_edit_product_screen.dart';
+import 'package:eduline/features/product/screens/product_detail_screen.dart';
+import 'package:eduline/shared/widgets/custom_tab_bar.dart';
+import 'package:eduline/features/home/widgets/home_app_bar.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final ProductController _controller = Get.find<ProductController>();
+  bool _showOngoing = true;
+  final location = ''.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.fetchProducts();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    try {
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        location.value = 'Location not enabled';
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition();
+      final placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
+      if (placemarks.isNotEmpty) {
+        final p = placemarks.first;
+        location.value =
+            '${p.subLocality ?? ''}, ${p.locality ?? ''}'.trim().replaceAll(RegExp(r'^,|,$'), '').trim();
+      }
+    } catch (_) {
+      location.value = 'Location unavailable';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.primaryColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Obx(() => homeAppBar(context, location.value)),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                  BorderRadius.vertical(top: Radius.circular(26)),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.w(5),
+                    vertical: context.h(3),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CustomText(
+                        text: 'My Services',
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      SizedBox(height: context.h(2)),
+                      Row(
+                        children: [
+                          CustomTabBar(
+                            label: 'Ongoing',
+                            selected: _showOngoing,
+                            onTap: () =>
+                                setState(() => _showOngoing = true),
+                          ),
+                          SizedBox(width: context.w(3)),
+                          CustomTabBar(
+                            label: 'Upcoming',
+                            selected: !_showOngoing,
+                            onTap: () =>
+                                setState(() => _showOngoing = false),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: context.h(1.5)),
+                      Obx(() {
+                        if (!_controller.isOffline.value) {
+                          return const SizedBox.shrink();
+                        }
+                        return Container(
+                          width: double.infinity,
+                          margin:
+                          EdgeInsets.only(bottom: context.h(1.5)),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(4),
+                            vertical: context.h(1),
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.orange[50],
+                            border: Border.all(color: Colors.orange),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.wifi_off,
+                                  color: Colors.orange, size: 16),
+                              SizedBox(width: context.w(2)),
+                              const Expanded(
+                                child: CustomText(
+                                  text:
+                                  'You are offline. Changes will sync when reconnected.',
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                      Obx(() {
+                        if (!_controller.isSyncing.value) {
+                          return const SizedBox.shrink();
+                        }
+                        return Container(
+                          width: double.infinity,
+                          margin:
+                          EdgeInsets.only(bottom: context.h(1.5)),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.w(4),
+                            vertical: context.h(1),
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue[50],
+                            border: Border.all(color: Colors.blue),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: [
+                              const SizedBox(
+                                height: 14,
+                                width: 14,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.blue),
+                              ),
+                              SizedBox(width: context.w(2)),
+                              const CustomText(
+                                text: 'Syncing offline changes…',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+
+                      Expanded(
+                        child: Obx(() {
+                          if (_controller.isLoading.value &&
+                              _controller.products.isEmpty) {
+                            return const LoadingWidget();
+                          }
+
+                          if (_controller.hasError.value) {
+                            return CustomErrorWidget(
+                              message: _controller.errorMessage.value,
+                              onRetry: _controller.fetchProducts,
+                            );
+                          }
+
+                          if (_controller.products.isEmpty) {
+                            return CustomErrorWidget(
+                              message:
+                              'No products found.\nCheck your internet or tap "Create Product".',
+                              onRetry: _controller.fetchProducts,
+                            );
+                          }
+
+                          return RefreshIndicator(
+                            onRefresh: _controller.fetchProducts,
+                            child: Stack(
+                              children: [
+                                GridView.builder(
+                                  physics:
+                                  const AlwaysScrollableScrollPhysics(),
+                                  padding: EdgeInsets.only(
+                                      bottom: context.h(2)),
+                                  itemCount:
+                                  _controller.products.length,
+                                  gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: context.h(2),
+                                    crossAxisSpacing: context.w(3.5),
+                                    childAspectRatio: 0.78,
+                                  ),
+                                  itemBuilder: (context, index) {
+                                    final product =
+                                    _controller.products[index];
+                                    return CustomGridView(
+                                      imageAsset: product
+                                          .imageUrl.isNotEmpty
+                                          ? product.imageUrl
+                                          : 'assets/placeholder/placeholder.png',
+                                      category: product.category,
+                                      title: product.name,
+                                      price:
+                                      '\$${product.price.toStringAsFixed(2)}',
+                                      inStock: product.stock > 0,
+                                      onViewDetails: () {
+                                        Get.to(
+                                              () => ProductDetailScreen(
+                                              product: product),
+                                        );
+                                      },
+                                      onEdit: () {
+                                        Get.to(() => AddEditProductScreen(product: product));
+                                      },
+                                    );
+                                  },
+                                ),
+                                if (_controller.isLoading.value)
+                                  const Positioned(
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    child: LinearProgressIndicator(
+                                        minHeight: 2),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
+                      Padding(
+                        padding:
+                        EdgeInsets.only(bottom: context.h(2)),
+                        child: CustomButton(
+                          title: 'Create Product',
+                          color: AppColors.primaryColor,
+                          width: double.infinity,
+                          onTap: () =>
+                              Get.to(() => AddEditProductScreen()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

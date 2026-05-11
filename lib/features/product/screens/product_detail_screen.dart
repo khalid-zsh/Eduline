@@ -1,0 +1,499 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:eduline/core/theme/app_colors.dart';
+import 'package:eduline/features/product/models/product_model.dart';
+import 'package:eduline/features/product/controllers/product_controller.dart';
+import 'package:eduline/shared/widgets/custom_text.dart';
+import 'package:eduline/core/extensions/context_extension.dart';
+import 'package:eduline/shared/widgets/custom_button.dart';
+import 'package:eduline/features/product/screens/add_edit_product_screen.dart';
+
+class ProductDetailScreen extends StatefulWidget {
+  final ProductModel product;
+
+  const ProductDetailScreen({super.key, required this.product});
+
+  @override
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+  bool _expanded = false;
+  late ProductModel _product;
+
+  @override
+  void initState() {
+    super.initState();
+    _product = widget.product;
+  }
+
+
+  Future<void> _onDelete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Product'),
+        content: Text('Are you sure you want to delete "${_product.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && _product.id != null) {
+      await Get.find<ProductController>().deleteProduct(
+        _product.id!,
+        _product.name,
+      );
+      Get.back();
+    }
+  }
+
+  Future<void> _onEdit() async {
+    final updated = await Get.to(() => AddEditProductScreen());
+    if (updated == true) {
+      final refreshed =
+      Get.find<ProductController>().getProductById(_product.id ?? '');
+      if (refreshed != null && mounted) {
+        setState(() => _product = refreshed);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tags = <String>[
+      if (_product.category.isNotEmpty) _product.category,
+      if (_product.brand.isNotEmpty) '${_product.brand} Brand',
+      if (_product.weight > 0) 'Weight: ${_product.weight} kg',
+      if (_product.dimensions.isNotEmpty) 'Dimensions: ${_product.dimensions}',
+      ..._product.tags,
+      ..._product.colors,
+    ];
+
+    final discounted =
+        _product.isDiscounted && _product.discountPercent > 0;
+    final displayPrice = discounted
+        ? '\$${_product.finalPrice.toStringAsFixed(2)}'
+        : '\$${_product.price.toStringAsFixed(2)}';
+
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBackground,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _TopBar(onDelete: _onDelete),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: context.w(5)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: context.h(2)),
+                      _ProductImageCard(
+                        imageUrl: _product.imageUrl,
+                        category: _product.category,
+                        context: context,
+                      ),
+                      SizedBox(height: context.h(2)),
+                      _TitlePriceRow(
+                        product: _product,
+                        displayPrice: displayPrice,
+                        discounted: discounted,
+                        context: context,
+                      ),
+                      SizedBox(height: context.h(2)),
+                      const DashedDivider(),
+                      SizedBox(height: context.h(2)),
+                      CustomText(
+                        text: _product.name,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.titleText,
+                      ),
+                      SizedBox(height: context.h(1)),
+                      if (tags.isNotEmpty)
+                        Wrap(
+                          spacing: context.w(3),
+                          runSpacing: context.h(1.2),
+                          children: tags.map((t) => _Tag(text: t)).toList(),
+                        ),
+                      SizedBox(height: context.h(2)),
+                      CustomText(
+                        text: 'Description',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.titleText,
+                      ),
+                      SizedBox(height: context.h(1)),
+                      _buildDescription(context),
+                      SizedBox(height: context.h(6)),
+                      const DashedDivider(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            context.w(6),
+            8,
+            context.w(6),
+            context.h(3),
+          ),
+          child: CustomButton(
+            title: 'Edit Product',
+            color: AppColors.primaryColor,
+            width: double.infinity,
+            height: context.h(7),
+            onTap: _onEdit,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDescription(BuildContext context) {
+    final text = _product.description.isNotEmpty
+        ? _product.description
+        : 'No description available.';
+    final preview = _expanded
+        ? text
+        : (text.length > 180 ? '${text.substring(0, 180)}...' : text);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          preview,
+          style: TextStyle(
+            color: AppColors.subtitleText,
+            height: 1.4,
+            fontSize: 14,
+          ),
+        ),
+        if (text.length > 180)
+          GestureDetector(
+            onTap: () => setState(() => _expanded = !_expanded),
+            child: Padding(
+              padding: EdgeInsets.only(top: context.h(0.8)),
+              child: CustomText(
+                text: _expanded ? 'Read Less' : 'Read More',
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+
+class _TopBar extends StatelessWidget {
+  final VoidCallback onDelete;
+  const _TopBar({required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.w(4),
+        vertical: context.h(1),
+      ),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Get.back(),
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: const BoxDecoration(
+                color: Color(0xFFF2F3F5),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.arrow_back, color: Colors.black87),
+            ),
+          ),
+          const Spacer(),
+          CustomText(
+            text: 'Product Detail',
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: AppColors.titleText,
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: onDelete,
+            child: Container(
+              height: 40,
+              width: 40,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFECEC),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.delete, color: Color(0xFFE53935)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductImageCard extends StatelessWidget {
+  final String imageUrl;
+  final String category;
+  final BuildContext context;
+
+  const _ProductImageCard({
+    required this.imageUrl,
+    required this.category,
+    required this.context,
+  });
+
+  @override
+  Widget build(BuildContext ctx) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Stack(
+        children: [
+          Container(
+            height: context.h(24),
+            width: double.infinity,
+            color: const Color(0xFFF2F3F5),
+            child: _buildImage(),
+          ),
+          if (category.isNotEmpty)
+            Positioned(
+              left: 12,
+              top: 12,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.w(3),
+                  vertical: context.h(0.5),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: CustomText(
+                  text: category.toUpperCase(),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.categoryColor.withValues(alpha: 0.60),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImage() {
+    if (imageUrl.isEmpty) {
+      return const Center(
+        child: Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey),
+      );
+    }
+    if (imageUrl.startsWith('http')) {
+      return Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
+        ),
+      );
+    }
+    return Image.asset(
+      imageUrl,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => const Center(
+        child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
+      ),
+    );
+  }
+}
+
+class _TitlePriceRow extends StatelessWidget {
+  final ProductModel product;
+  final String displayPrice;
+  final bool discounted;
+  final BuildContext context;
+
+  const _TitlePriceRow({
+    required this.product,
+    required this.displayPrice,
+    required this.discounted,
+    required this.context,
+  });
+
+  @override
+  Widget build(BuildContext ctx) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: context.w(2),
+                children: [
+                  CustomText(
+                    text: product.name,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.titleText,
+                  ),
+                  Container(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (product.isActive
+                          ? AppColors.categoryColor
+                          : Colors.grey)
+                          .withValues(alpha: 0.80),
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: CustomText(
+                      text: product.isActive ? 'active' : 'inactive',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 10,
+                      color: AppColors.backgroundColor,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: context.h(0.5)),
+              Row(
+                children: [
+                  Icon(
+                    product.stock > 0 ? Icons.check : Icons.close,
+                    color: product.stock > 0
+                        ? const Color(0xFF2ECC71)
+                        : Colors.red,
+                    size: 16,
+                  ),
+                  SizedBox(width: context.w(1)),
+                  CustomText(
+                    text: product.stock > 0
+                        ? 'In Stock (${product.stock})'
+                        : 'Out of Stock',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: product.stock > 0
+                        ? const Color(0xFF2ECC71)
+                        : Colors.red,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            CustomText(
+              text: displayPrice,
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+            if (discounted)
+              CustomText(
+                text: 'Discount: ${product.discountPercent.toStringAsFixed(0)}%',
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: AppColors.subtitleText,
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _Tag extends StatelessWidget {
+  final String text;
+  const _Tag({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: context.w(5),
+        vertical: context.h(1.2),
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.categoryColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: CustomText(
+        text: text,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.backgroundColor,
+      ),
+    );
+  }
+}
+
+class DashedDivider extends StatelessWidget {
+  final double height;
+  final Color color;
+
+  const DashedDivider({
+    super.key,
+    this.height = 1,
+    this.color = const Color(0xFFD9D9D9),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: height + 8,
+      child: CustomPaint(
+        painter: _DashPainter(color: color),
+        child: const SizedBox(width: double.infinity),
+      ),
+    );
+  }
+}
+
+class _DashPainter extends CustomPainter {
+  final Color color;
+  _DashPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    const dashWidth = 6.0;
+    const dashSpace = 6.0;
+    double x = 0;
+    while (x < size.width) {
+      canvas.drawLine(Offset(x, 0), Offset(x + dashWidth, 0), paint);
+      x += dashWidth + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
