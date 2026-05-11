@@ -169,7 +169,6 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       );
       return;
     }
-
     if (_dobController.text.trim().isEmpty) {
       Get.snackbar(
         'Validation',
@@ -179,7 +178,6 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       );
       return;
     }
-
     if (_selectedGender == null) {
       Get.snackbar(
         'Validation',
@@ -189,13 +187,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
       );
       return;
     }
-
     final authController = Get.find<AuthController>();
-
     try {
       if (isEditMode) {
         final currentUser = authController.currentUser.value;
-
         await authController.updateProfile(
           fullName: currentUser?.fullName ?? '',
           aboutUs: _aboutController.text.trim(),
@@ -203,14 +198,12 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
           gender: _selectedGender!,
           image: _avatar,
         );
-
         Get.snackbar(
           'Success',
           'Profile updated successfully',
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
         Get.back();
       } else {
         await authController.completeProfile(
@@ -219,7 +212,6 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
           gender: _selectedGender!,
           image: _avatar,
         );
-
         Get.dialog(
           SuccessPopup(
             title: 'Congratulations!',

@@ -129,7 +129,7 @@ class _VerifyCodeScreenState extends State<VerifyCodeScreen> {
           onTap: () async {
             Get.back();
             await Future.delayed(Duration(milliseconds: 200));
-            Get.offAllNamed(AppRoutes.login);
+            Get.offAllNamed(AppRoutes.enableLocation);
           }
       ),
     );

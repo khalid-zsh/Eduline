@@ -7,7 +7,6 @@ import 'package:eduline/features/product/controllers/product_metadata_controller
 import 'package:eduline/features/product/models/product_model.dart';
 import 'package:eduline/features/product/widgets/product_dropdown_field.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
-import 'package:eduline/shared/widgets/custom_button.dart';
 import 'package:eduline/shared/services/file_picker_service.dart';
 import 'package:eduline/features/product/widgets/form_section.dart';
 import 'package:eduline/features/product/widgets/product_form_text_field.dart';
