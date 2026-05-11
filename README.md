@@ -112,14 +112,7 @@ features/
     └── widgets/       ← Feature-specific UI components
 ```
 
----
 
-## Branch
-
-| Branch | Description |
-|---|---|
-| `main` | Stable release |
-| `refactor/feature-folder-structure` | Feature folder migration |
 
 ---
 
