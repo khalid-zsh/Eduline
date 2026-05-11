@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import '../../../colors/colors.dart';
+
+import '../../core/theme/app_colors.dart';
 
 class CustomText extends StatelessWidget {
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../colors/colors.dart';
-import '../../../helper/context_extension.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
+
+import '../../core/extensions/context_extension.dart';
+import '../../core/theme/app_colors.dart';
 
 class CustomTabBar extends StatelessWidget {
   final String label;

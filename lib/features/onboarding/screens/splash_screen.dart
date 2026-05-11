@@ -7,7 +7,7 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:eduline/core/theme/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../helper/context_extension.dart';
+import '../../../core/extensions/context_extension.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

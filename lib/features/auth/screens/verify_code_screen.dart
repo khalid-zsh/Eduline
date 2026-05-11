@@ -7,7 +7,7 @@ import 'package:eduline/shared/widgets/custom_button.dart';
 import 'package:eduline/shared/widgets/success_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../helper/context_extension.dart';
+import '../../../core/extensions/context_extension.dart';
 
 class VerifyCodeScreen extends StatefulWidget {
   const VerifyCodeScreen({super.key});

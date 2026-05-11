@@ -1,12 +1,13 @@
 import 'package:eduline/core/constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../colors/colors.dart';
-import '../../../controller/auth_controller.dart';
-import '../../../helper/context_extension.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
 import 'package:eduline/shared/widgets/custom_button.dart';
 import 'package:eduline/shared/widgets/custom_text_field.dart';
+
+import '../../../core/extensions/context_extension.dart';
+import '../../../core/theme/app_colors.dart';
+import '../controllers/auth_controller.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../colors/colors.dart';
-import '../../../controller/auth_controller.dart';
-import '../../../helper/context_extension.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
+import '../../../core/extensions/context_extension.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../auth/controllers/auth_controller.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

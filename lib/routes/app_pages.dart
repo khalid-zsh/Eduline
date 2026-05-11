@@ -2,19 +2,20 @@ import 'package:get/get.dart';
 import 'package:eduline/features/product/models/product_model.dart';
 import 'package:eduline/features/home/screens/home_screen.dart';
 import 'package:eduline/features/product/screens/add_edit_product_screen.dart';
-import '../ui/pages/ProfilePage/profile_page.dart';
-import '../ui/pages/Register/sign_up.dart';
-import '../ui/pages/forgot_password/forgot_password.dart';
-import '../ui/pages/language_section/language_section.dart';
-import '../ui/pages/login/login_screen.dart';
-import '../ui/pages/onboarding/onBoarding_screen.dart';
-import '../ui/pages/profile_setup/profile_setup.dart';
-import '../ui/pages/splash/splash_screen.dart';
-import '../ui/pages/varify/varify_code_screen.dart';
-import '../ui/pages/reset_password/reset_password.dart';
-import '../ui/pages/enable_location/enable_location.dart';
-import 'package:eduline/features/product/screens/product_detail_screen.dart';
-import '../ui/widgets/custom_success_popup/success_popup.dart';
+import '../features/auth/screens/forgot_password_screen.dart';
+import '../features/auth/screens/login_screen.dart';
+import '../features/auth/screens/reset_password_screen.dart';
+import '../features/auth/screens/signup_screen.dart';
+import '../features/auth/screens/verify_code_screen.dart';
+import '../features/location/screens/enable_location_screen.dart';
+import '../features/location/screens/language_selection_screen.dart';
+import '../features/onboarding/screens/onboarding_screen.dart';
+import '../features/onboarding/screens/splash_screen.dart';
+import '../features/product/screens/product_detail_screen.dart';
+import '../features/profile/screens/profile_screen.dart';
+import '../features/profile/screens/setup_profile_screen.dart';
+import '../shared/widgets/success_popup.dart';
+
 
 class AppPages {
   static List<GetPage> routes = [
