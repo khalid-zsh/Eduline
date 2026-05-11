@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:eduline/features/auth/data/auth_remote_data_source.dart';
 import 'package:eduline/shared/services/auth_storage.dart';
 import 'package:eduline/features/auth/models/user_model.dart';
-import 'package:eduline/core/constants/app_routes.dart';
+import 'package:eduline/routes/app_routes.dart';
 import 'dart:io';
 
 class AuthController extends GetxController {

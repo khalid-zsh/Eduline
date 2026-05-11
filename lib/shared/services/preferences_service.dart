@@ -4,8 +4,7 @@ class PreferencesService {
   late SharedPreferences _prefs;
 
   PreferencesService._internal();
-  static final PreferencesService instance =
-  PreferencesService._internal();
+  static final PreferencesService instance = PreferencesService._internal();
    Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
   }

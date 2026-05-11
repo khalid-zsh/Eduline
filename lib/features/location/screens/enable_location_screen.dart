@@ -1,6 +1,6 @@
 import 'package:eduline/core/theme/app_colors.dart';
 import 'package:eduline/core/extensions/context_extension.dart';
-import 'package:eduline/core/constants/app_routes.dart';
+import 'package:eduline/routes/app_routes.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
 import 'package:eduline/shared/widgets/custom_button.dart';
 import 'package:flutter/material.dart';

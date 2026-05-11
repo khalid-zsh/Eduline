@@ -1,6 +1,6 @@
 import 'package:eduline/features/auth/controllers/auth_controller.dart';
 import 'package:eduline/shared/services/preferences_service.dart';
-import 'package:eduline/core/constants/app_routes.dart';
+import 'package:eduline/routes/app_routes.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';

@@ -1,4 +1,4 @@
-import 'package:eduline/core/constants/app_routes.dart';
+import 'package:eduline/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:eduline/shared/widgets/custom_text.dart';
